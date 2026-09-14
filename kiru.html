@@ -145,11 +145,26 @@
 
   document.getElementById('cpbtn').addEventListener('click', codePatchTest);
   document.getElementById('frbtn').addEventListener('click', h5fridaTest);
-  document.getElementById('reload').addEventListener('click', function(){
-    // cache-bust reload so gist edits show up immediately
-    var b=location.href.split('?')[0];
-    location.href = b + '?t=' + Date.now();
-  });
+  // In-place refresh: DON'T navigate (H5GG reverts navigations). Same-origin
+  // fetch with a unique query (CDN cache-miss = fresh) + no-store, then swap the
+  // body and re-run scripts. window.h5gg (native bridge) survives this.
+  function reloadMenu(){
+    var url = location.pathname.split('?')[0] + '?t=' + Date.now();
+    fetch(url, {cache:'no-store'})
+      .then(function(r){ return r.text(); })
+      .then(function(html){
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        document.body.innerHTML = doc.body.innerHTML;
+        var ss = doc.querySelectorAll('script');
+        for (var i=0;i<ss.length;i++){
+          var s=document.createElement('script');
+          if(ss[i].src){ s.src=ss[i].src; } else { s.textContent=ss[i].textContent; }
+          document.body.appendChild(s);
+        }
+      })
+      .catch(function(e){ try{ alert('reload fail: '+e); }catch(_){} });
+  }
+  document.getElementById('reload').addEventListener('click', reloadMenu);
 
   var n=0; var iv=setInterval(function(){ n++; if(typeof h5gg!=='undefined'||n>20){ clearInterval(iv); if(diag()){ codePatchTest(); } } }, 300);
 </script>
