@@ -5,168 +5,231 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>kiru mod</title>
 <style>
-  * { box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
-  html,body { margin:0; padding:0; font-family:-apple-system,"Hiragino Sans",sans-serif; }
-  body { background:rgba(10,10,18,0.96); color:#ecebf3; padding:14px 14px 24px; }
-  .brand { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-  .logo { width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-          font-weight:800;color:#1a0e18;background:linear-gradient(135deg,#ff6f8a,#ffb45a); }
-  h1 { font-size:17px; margin:0; }
-  .ver { font-size:10px; color:#8a89a3; margin-top:2px; }
-  .card { background:rgba(30,28,42,0.7); border:1px solid #2f2c3e; border-radius:12px; padding:12px; margin:10px 0; }
-  .row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-  .label { font-size:14px; }
-  .sub { font-size:11px; color:#8a89a3; margin-top:4px; word-break:break-all; }
-  .btn { display:inline-block; padding:9px 14px; border-radius:9px; border:1px solid #3d394f;
-         background:#1e1c2a; color:#ecebf3; font-size:13px; font-weight:700; }
-  .btn.primary { background:linear-gradient(135deg,#ff6f8a,#ffb45a); color:#1a0e18; border:none; }
-  .sw { position:relative; width:46px; height:26px; flex:0 0 auto; }
-  .sw input { display:none; }
-  .sl { position:absolute; inset:0; background:#26243a; border:1px solid #3d394f; border-radius:99px; transition:.15s; }
-  .sl:before { content:""; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#8a89a3; transition:.15s; }
-  .sw input:checked + .sl { background:linear-gradient(135deg,#ff6f8a,#ffb45a); border-color:transparent; }
-  .sw input:checked + .sl:before { transform:translateX(20px); background:#fff; }
-  .slider { width:100%; margin-top:10px; -webkit-appearance:none; height:6px; border-radius:99px; background:#26243a; outline:none; }
-  .slider::-webkit-slider-thumb { -webkit-appearance:none; width:20px;height:20px;border-radius:50%; background:linear-gradient(135deg,#ff6f8a,#ffb45a); }
-  .val { font-family:ui-monospace,monospace; font-weight:700; color:#ffb45a; }
-  .ok { color:#6fe6b4; } .bad { color:#ff5c7c; } .warn{color:#ffb45a;}
-  pre { font-size:10.5px; color:#b7b4c9; white-space:pre-wrap; word-break:break-all; margin:6px 0 0; line-height:1.5; }
+  *{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  html,body{margin:0;padding:0;font-family:-apple-system,"Hiragino Sans",sans-serif;}
+  body{background:rgba(10,10,18,0.97);color:#ecebf3;padding:12px 12px 24px;}
+  .brand{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+  .bl{display:flex;align-items:center;gap:10px;}
+  .logo{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#1a0e18;background:linear-gradient(135deg,#ff6f8a,#ffb45a);}
+  h1{font-size:17px;margin:0;} .ver{font-size:10px;color:#8a89a3;margin-top:2px;}
+  #eng{font-size:10px;font-family:ui-monospace,monospace;padding:2px 6px;border-radius:6px;}
+  .eng-ok{color:#6fe6b4;border:1px solid rgba(111,230,180,.4);} .eng-bad{color:#ff5c7c;border:1px solid rgba(255,92,124,.4);} .eng-warn{color:#ffb45a;border:1px solid rgba(255,180,90,.4);}
+  .tabs{display:flex;gap:4px;margin:8px 0;overflow-x:auto;}
+  .tab{flex:0 0 auto;background:#1e1c2a;border:1px solid #2f2c3e;color:#8a89a3;font-size:12px;font-weight:700;padding:7px 12px;border-radius:8px;}
+  .tab.on{color:#1a0e18;background:linear-gradient(135deg,#ff6f8a,#ffb45a);border-color:transparent;}
+  .panel{display:none;} .panel.on{display:block;}
+  .card{background:rgba(30,28,42,.7);border:1px solid #2f2c3e;border-radius:12px;padding:11px 12px;margin:8px 0;}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .id{font-family:ui-monospace,monospace;font-size:10px;color:#ff6f8a;background:rgba(255,111,138,.12);border:1px solid rgba(255,111,138,.28);border-radius:4px;padding:2px 5px;}
+  .id.w{color:#ffb45a;background:rgba(255,180,90,.12);border-color:rgba(255,180,90,.28);} .id.d{color:#ff5c7c;background:rgba(255,92,124,.12);border-color:rgba(255,92,124,.3);}
+  .label{font-size:14px;flex:1;} .sub{font-size:11px;color:#8a89a3;margin-top:3px;}
+  .sw{position:relative;width:46px;height:26px;flex:0 0 auto;} .sw input{display:none;}
+  .sl{position:absolute;inset:0;background:#26243a;border:1px solid #3d394f;border-radius:99px;transition:.15s;}
+  .sl:before{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#8a89a3;transition:.15s;}
+  .sw input:checked + .sl{background:linear-gradient(135deg,#ff6f8a,#ffb45a);border-color:transparent;}
+  .sw input:checked + .sl:before{transform:translateX(20px);background:#fff;}
+  .slider{width:100%;margin-top:9px;-webkit-appearance:none;height:6px;border-radius:99px;background:#26243a;}
+  .slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#ff6f8a,#ffb45a);}
+  .val{font-family:ui-monospace,monospace;font-weight:700;color:#ffb45a;}
+  .btn{padding:9px 14px;border-radius:9px;border:1px solid #3d394f;background:#1e1c2a;color:#ecebf3;font-size:13px;font-weight:700;}
+  .btn.p{background:linear-gradient(135deg,#ff6f8a,#ffb45a);color:#1a0e18;border:none;} .btn.d{background:rgba(255,92,124,.12);color:#ff5c7c;border-color:rgba(255,92,124,.35);}
+  .wide{display:block;width:100%;text-align:center;margin-top:8px;}
 </style>
 </head>
 <body>
-  <div class="brand" style="justify-content:space-between">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div class="logo">K</div>
-      <div><h1>kiru mod</h1><div class="ver">remote / v11.88.0</div></div>
-    </div>
-    <span class="btn primary" id="reload">🔄 更新</span>
+  <div class="brand">
+    <div class="bl"><div class="logo">K</div><div><h1>kiru mod</h1><div class="ver">H5GG + h5frida / v11.88.0</div></div></div>
+    <span id="eng" class="eng-warn">init…</span>
   </div>
 
-  <div class="card">
-    <div class="row"><span class="label">① エンジン疎通</span></div>
-    <pre id="diag">checking…</pre>
+  <div class="tabs">
+    <div class="tab on" data-t="game">Game</div>
+    <div class="tab" data-t="live">Live</div>
+    <div class="tab" data-t="data">Data</div>
+    <div class="tab" data-t="sys">System</div>
   </div>
 
-  <div class="card">
-    <div class="row"><span class="label">② コードパッチ検証 (frida不要)</span>
-      <span class="btn" id="cpbtn">再実行</span></div>
-    <div class="sub">UnityFrameworkのコード番地にwrite→読戻し→復元。◎ならD1-D6/M1等が動的トグルで実装可</div>
-    <pre id="cp">tap 再実行</pre>
+  <div class="panel on" data-p="game">
+    <div class="card"><div class="row"><span class="id d">D</span><div class="label">チート検出無効 (D1-D6)</div><label class="sw"><input type="checkbox" id="cD" checked><span class="sl"></span></label></div><div class="sub">検出器を無効化。ミニゲーム開始前にONを推奨</div></div>
+    <div class="card"><div class="row"><span class="id">M1</span><div class="label">HP 無限</div><label class="sw"><input type="checkbox" id="cM1"><span class="sl"></span></label></div></div>
+    <div class="card"><div class="row"><span class="id w">M2</span><div class="label">スコア倍率</div><span class="val" id="vM2">x1</span></div><input class="slider" id="sM2" type="range" min="1" max="500" value="1"></div>
+    <div class="card"><div class="row"><span class="id w">M3</span><div class="label">ゴールド倍率</div><span class="val" id="vM3">x1</span></div><input class="slider" id="sM3" type="range" min="1" max="500" value="1"></div>
+    <div class="card"><div class="row"><span class="id w">M4</span><div class="label">経験値倍率</div><span class="val" id="vM4">x1</span></div><input class="slider" id="sM4" type="range" min="1" max="500" value="1"></div>
   </div>
 
-  <div class="card">
-    <div class="row"><span class="label">③ h5frida フック検証</span>
-      <span class="btn primary" id="frbtn">ロード試行</span></div>
-    <div class="sub">frida15が26.6で動くか。動けばフック/コードパッチ/ObjC全部いける。落ちたら=不可。<b>アプリが落ちる可能性あり</b></div>
-    <pre id="fr">tap ロード試行</pre>
+  <div class="panel" data-p="live">
+    <div class="card"><div class="row"><span class="id">M8</span><div class="label">配信者ミュート解除</div><label class="sw"><input type="checkbox" id="cM8"><span class="sl"></span></label></div></div>
+    <div class="card"><div class="row"><span class="id d">M12</span><div class="label">キック/ブロックUI抑制</div><label class="sw"><input type="checkbox" id="cM12"><span class="sl"></span></label></div></div>
+    <div class="card"><div class="row"><span class="id">TX</span><div class="label">名前/コメント文字数制限バイパス</div><label class="sw"><input type="checkbox" id="cTX"><span class="sl"></span></label></div></div>
   </div>
 
-  <div class="card">
-    <div class="row">
-      <div><div class="label">サンプル トグル</div><div class="sub">UI確認</div></div>
-      <label class="sw"><input type="checkbox" id="t1" checked><span class="sl"></span></label>
-    </div>
+  <div class="panel" data-p="data">
+    <div class="card"><div class="row"><span class="id">M11</span><div class="label">エモモ 顔画像URL収集</div><label class="sw"><input type="checkbox" id="cM11"><span class="sl"></span></label></div>
+      <div class="sub" id="collInfo">収集: 0 件</div>
+      <button class="btn wide" id="bColl">収集先パスを表示</button></div>
   </div>
-  <div class="card">
-    <div class="row"><span class="label">サンプル スライダー</span><span class="val" id="sv">x10</span></div>
-    <input class="slider" id="s1" type="range" min="1" max="500" value="10">
+
+  <div class="panel" data-p="sys">
+    <div class="card"><div class="row"><span class="id d">M13</span><div class="label">Device Spoof</div><label class="sw"><input type="checkbox" id="cSP"><span class="sl"></span></label></div>
+      <div class="sub" id="spInfo">MGCopyAnswer/IDFV/IDFA を偽装（起動中のみ）</div></div>
+    <div class="card" style="border-color:rgba(255,92,124,.24)"><div class="row"><span class="id d">M13</span><div class="label">アプリリセット & 新ID</div></div>
+      <div class="sub">データ消去＋新しい識別子を生成して再起動</div>
+      <button class="btn d wide" id="bReset">リセットを実行</button></div>
+    <div class="card"><div class="row"><span class="label">エンジン状態</span><button class="btn" id="bStat">確認</button></div><pre id="stat" style="font-size:10px;color:#b7b4c9;white-space:pre-wrap;margin:6px 0 0"></pre></div>
   </div>
 
 <script>
-  var s1=document.getElementById('s1'), sv=document.getElementById('sv');
-  s1.addEventListener('input', function(){ sv.textContent='x'+s1.value; });
+/* ---------- frida in-process script (runs in target, full frida API) ---------- */
+function frida_script(){ if(arguments.length) return new Error().line;
+  var S={ m1:false, m2:1, m3:1, m4:1, det:false, m8:false, m11:false, m12:false, tx:false, spoof:false };
+  var log=function(){};
+  var UF=null; try{ UF=Module.findBaseAddress("UnityFramework"); }catch(e){}
+  var RVA={ doDamage:0x0468A35C, addDamage:0x046A465C, gcAddGold:0x0467BA74, scAddGold:0x046A4420, addExp:0x046A45E8,
+            dets:[0x0178F83C,0x0178F8D0,0x0178FD18,0x01790068,0x017905B8,0x017917F4,0x0178D438] };
+  var savedBytes={};
 
-  function hex(n){ return '0x'+(n>>>0>=0?Number(n):n).toString(16); }
-  function toHexAddr(n){ return '0x'+Math.trunc(n).toString(16); }
+  function patchRet(rva){
+    if(!UF) return false;
+    var a=UF.add(rva);
+    try{ if(!savedBytes[rva]) savedBytes[rva]=a.readByteArray(4);
+      Memory.patchCode(a,4,function(w){ new Arm64Writer(w).putRet(); });
+      return true;
+    }catch(e){ return false; }
+  }
+  function unpatch(rva){
+    if(!UF||!savedBytes[rva]) return;
+    var a=UF.add(rva);
+    try{ Memory.patchCode(a,4,function(w){ Memory.writeByteArray(w, savedBytes[rva]); }); }catch(e){}
+  }
+  function applyDet(on){ for(var i=0;i<RVA.dets.length;i++){ on?patchRet(RVA.dets[i]):unpatch(RVA.dets[i]); } }
 
-  function diag(){
-    var d=document.getElementById('diag');
-    if(typeof h5gg==='undefined'){ d.className='bad'; d.textContent='h5gg undefined'; return false; }
-    var out=['H5GG OK'];
-    try{ var r=h5gg.getRangesList('UnityFramework'); out.push('UnityFramework: '+(r?r.length+' seg':'null')); if(r&&r.length) out.push('UF base: '+r[0].start); }catch(e){ out.push('UF err:'+e); }
-    d.className='ok'; d.textContent=out.join('\n'); return true;
+  // M1: zero the damage int arg (attach; original runs)
+  function hookM1(){ if(!UF) return; try{ Interceptor.attach(UF.add(RVA.doDamage),{ onEnter:function(a){ if(S.m1) a[1]=ptr(0); } }); }catch(e){} }
+  // M2/M3/M4: multiply a float arg in v0 (s0). frida arm64 context exposes q0..q7 as buffer.
+  function mulHook(rva,key){ if(!UF) return; try{ Interceptor.attach(UF.add(rva),{ onEnter:function(){ var m=S[key]; if(m&&m!==1){ try{ var b=this.context.q0; var f=new Float32Array(b); f[0]=f[0]*m; this.context.q0=b; }catch(e){} } } }); }catch(e){} }
+
+  // ObjC BOOL method force across mirrativ classes
+  var PFX=["_TtC8mirrativ","_TtCO11MirrativAPI","_TtC12MirrativCore","_TtC11MirrativAPI"];
+  function isMir(n){ for(var i=0;i<PFX.length;i++) if(n.indexOf(PFX[i])===0) return true; return false; }
+  function forceBool(sel,val,gate){ if(!ObjC.available) return 0; var want=val?1:0,n=0;
+    var names=Object.keys(ObjC.classes);
+    for(var i=0;i<names.length;i++){ var nm=names[i]; if(!isMir(nm)) continue;
+      try{ var cls=ObjC.classes[nm]; var m=cls["- "+sel]; if(!m) continue;
+        (function(m){ var old=m.implementation;
+          m.implementation=ObjC.implement(m,function(self,sel2){ if(gate()) return want; return old(self,sel2); });
+        })(m); n++;
+      }catch(e){}
+    } return n;
+  }
+  function setArgFalse(className,sel,argIdx){ try{ var c=ObjC.classes[className]; if(!c) return; var m=c["- "+sel]; if(!m) return;
+    var old=m.implementation; m.implementation=ObjC.implement(m,function(self,s,a){ return old(self,s,0); }); }catch(e){} }
+
+  // M11 collect avatar/face urls: hook +[NSURL URLWithString:]
+  var collN=0, collPath="";
+  function writeColl(url){ try{
+      var HD=new NativeFunction(Module.findExportByName("Foundation","NSHomeDirectory"),'pointer',[]);
+      collPath=ObjC.Object(HD()).toString()+"/Documents/emomo_urls.txt";
+      var fopen=new NativeFunction(Module.findExportByName(null,"fopen"),'pointer',['pointer','pointer']);
+      var fputs=new NativeFunction(Module.findExportByName(null,"fputs"),'int',['pointer','pointer']);
+      var fclose=new NativeFunction(Module.findExportByName(null,"fclose"),'int',['pointer']);
+      var fp=fopen(Memory.allocUtf8String(collPath),Memory.allocUtf8String("a")); if(fp.isNull())return;
+      fputs(Memory.allocUtf8String(url+"\n"),fp); fclose(fp);
+    }catch(e){} }
+  var seen={};
+  function hookM11(){ if(!ObjC.available) return; try{ var m=ObjC.classes.NSURL["+ URLWithString:"]; var old=m.implementation;
+      m.implementation=ObjC.implement(m,function(self,sel,u){ if(S.m11){ try{ var s=ObjC.Object(u).toString(); var l=s.toLowerCase();
+        if((l.indexOf("avatar")>=0||l.indexOf("emomo")>=0||l.indexOf("mirrorman")>=0)&&!seen[s]){ seen[s]=1; collN++; writeColl(s); } }catch(e){} }
+        return old(self,sel,u); }); }catch(e){} }
+
+  // M13 spoof: MGCopyAnswer + IDFV + IDFA
+  var idfv=null,idfa=null,mgvals=null;
+  function genId(){ function hex(n){var s="";for(var i=0;i<n;i++)s+="0123456789abcdef"[Math.floor(Math.random()*16)];return s;}
+    function uuid(){var h=hex(32).toUpperCase();return h.slice(0,8)+"-"+h.slice(8,12)+"-4"+h.slice(13,16)+"-A"+h.slice(17,20)+"-"+h.slice(20,32);}
+    idfv=uuid(); idfa=uuid();
+    mgvals={ "UniqueDeviceID":uuid(), "SerialNumber":hex(12).toUpperCase(), "WifiAddress":hex(12).match(/../g).join(":"), "BluetoothAddress":hex(12).match(/../g).join(":") };
+  }
+  function hookSpoof(){ if(!ObjC.available) return;
+    try{ var mg=Module.findExportByName(null,"MGCopyAnswer"); if(mg){ var key=null;
+      Interceptor.attach(mg,{ onEnter:function(a){ try{key=ObjC.Object(a[0]).toString();}catch(e){key=null;} },
+        onLeave:function(r){ if(S.spoof&&key&&mgvals&&mgvals[key]!==undefined){ try{ var s=ObjC.classes.NSString.stringWithString_(mgvals[key]); r.replace(s); }catch(e){} } } }); } }catch(e){}
+    try{ var UID=ObjC.classes.UIDevice["- identifierForVendor"]; var oldv=UID.implementation;
+      UID.implementation=ObjC.implement(UID,function(self,sel){ if(S.spoof&&idfv){ try{ return ObjC.classes.NSUUID.alloc().initWithUUIDString_(idfv); }catch(e){} } return oldv(self,sel); }); }catch(e){}
+    try{ if(ObjC.classes.ASIdentifierManager){ var AD=ObjC.classes.ASIdentifierManager["- advertisingIdentifier"]; var olda=AD.implementation;
+      AD.implementation=ObjC.implement(AD,function(self,sel){ if(S.spoof&&idfa){ try{ return ObjC.classes.NSUUID.alloc().initWithUUIDString_(idfa); }catch(e){} } return olda(self,sel); }); } }catch(e){}
   }
 
-  // ② frida-free code patch probe: write RET to a UnityFramework code addr, read back, restore
-  function codePatchTest(){
-    var el=document.getElementById('cp');
-    try{
-      if(typeof h5gg==='undefined'){ el.className='bad'; el.textContent='h5gg undefined'; return; }
-      var r=h5gg.getRangesList('UnityFramework');
-      if(!r||!r.length){ el.className='bad'; el.textContent='UnityFramework not found'; return; }
-      var base=Number(r[0].start);
-      var RVA=0x0468A35C;                 // DoDamage (from dump)
-      var addr=base+RVA;
-      var addrHex=toHexAddr(addr);
-      var RET=String(0xD65F03C0>>>0);     // arm64 'ret' as U32 (bytes C0 03 5F D6)
-      var orig=h5gg.getValue(addrHex,'U32');
-      var wrote=h5gg.setValue(addrHex, RET, 'U32');
-      var rb=h5gg.getValue(addrHex,'U32');
-      // restore
-      if(orig!==null && orig!==undefined) h5gg.setValue(addrHex, String(orig), 'U32');
-      var rb2=h5gg.getValue(addrHex,'U32');
-      var success = (Number(rb)>>>0)===(0xD65F03C0>>>0);
-      el.className = success?'ok':'bad';
-      el.textContent =
-        'addr: '+addrHex+
-        '\norig U32: '+orig+' ('+(orig!=null?hex(Number(orig)):'')+')'+
-        '\nsetValue ret: '+wrote+
-        '\nread-back: '+rb+' ('+(rb!=null?hex(Number(rb)):'')+')'+
-        '\nrestored: '+rb2+
-        '\n=> CODE PATCH '+(success?'OK ✅ (frida不要で行ける)':'FAIL ❌ (コード書込不可)');
-    }catch(e){ el.className='bad'; el.textContent='exception: '+e; }
-  }
+  function doReset(){ try{
+      var ud=ObjC.classes.NSUserDefaults.standardUserDefaults(); var d=ud.dictionaryRepresentation(); var ks=d.allKeys(); var n=ks.count();
+      for(var i=0;i<n;i++){ try{ ud.removeObjectForKey_(ks.objectAtIndex_(i)); }catch(e){} }
+      try{ ud.removePersistentDomainForName_("com.dena.mirrativ"); }catch(e){} ud.synchronize();
+      try{ var st=ObjC.classes.NSHTTPCookieStorage.sharedHTTPCookieStorage(); st.removeCookiesSinceDate_(ObjC.classes.NSDate.distantPast()); }catch(e){}
+      genId();
+      setTimeout(function(){ try{ var ex=new NativeFunction(Module.findExportByName(null,"exit"),'void',['int']); ex(0); }catch(e){} },400);
+      return "reset done, exiting";
+    }catch(e){ return "reset err:"+e; } }
 
-  // ③ h5frida load + code-patch probe (frida-15 based). May crash if frida-15 dies on iOS26.
-  function h5fridaTest(){
-    var el=document.getElementById('fr');
-    el.className='warn'; el.textContent='loading h5frida (frida-gadget-15 dlopen)…';
-    setTimeout(function(){
-      try{
-        var h5f=h5gg.loadPlugin('h5frida','h5frida-15.1.24.dylib');
-        if(!h5f){ el.className='bad'; el.textContent='loadPlugin returned null → h5frida load FAIL'; return; }
-        var out=['h5frida LOADED ✅'];
-        try{ out.push('plugin ver: '+h5f.pluginVersion()); }catch(e){ out.push('pluginVersion err: '+e); }
-        try{ out.push('frida core: '+h5f.coreVersion()); }catch(e){ out.push('coreVersion err: '+e); }
-        // code-patch self-test on hookme.test.dylib (from repo example)
-        try{
-          var hm=h5gg.loadPlugin('hookme','hookme.test.dylib');
-          var before=hm.addInt(1,2);
-          var active=h5f.ActiveCodePatch('hookme.test.dylib',0x7E48,'200080D2');
-          var after=hm.addInt(1,2);
-          try{ h5f.DeactiveCodePatch('hookme.test.dylib',0x7E48,'200080D2'); }catch(e){}
-          out.push('codepatch active='+active+'  addInt(1,2): before='+before+' after='+after);
-          out.push(String(before)!==String(after) ? '=> CODE PATCH via h5frida OK ✅ (全部いける)' : '=> codepatch 効果なし ❌');
-        }catch(e){ out.push('codepatch err: '+e); }
-        el.className='ok'; el.textContent=out.join('\n');
-      }catch(e){ el.className='bad'; el.textContent='exception: '+e; }
-    }, 60);
-  }
+  rpc.exports={
+    init:function(){ var r={UF:UF?UF.toString():null, objc:!!ObjC.available};
+      try{ hookM1(); mulHook(RVA.addDamage,'m2'); mulHook(RVA.gcAddGold,'m3'); mulHook(RVA.scAddGold,'m3'); mulHook(RVA.addExp,'m4');
+        genId(); hookSpoof(); hookM11();
+        r.m8=forceBool("isMuted",false,function(){return S.m8;})+forceBool("checkIsMuted",false,function(){return S.m8;});
+        r.m12=forceBool("isKickedBy",false,function(){return S.m12;})+forceBool("isBlocking",false,function(){return S.m12;})+forceBool("isSuspend",false,function(){return S.m12;})+forceBool("isSuspended",false,function(){return S.m12;});
+        r.tx=forceBool("textField:shouldChangeCharactersInRange:replacementString:",true,function(){return S.tx;})+forceBool("textView:shouldChangeTextInRange:replacementText:",true,function(){return S.tx;});
+      }catch(e){ r.err=""+e; }
+      return JSON.stringify(r);
+    },
+    set:function(k,v){ if(k==='det'){ S.det=v; applyDet(v); } else { S[k]=v; } return true; },
+    reset:function(){ return doReset(); },
+    coll:function(){ return collN+"|"+collPath; },
+    status:function(){ return JSON.stringify({UF:UF?UF.toString():null,S:S,coll:collN}); }
+  };
+}
 
-  document.getElementById('cpbtn').addEventListener('click', codePatchTest);
-  document.getElementById('frbtn').addEventListener('click', h5fridaTest);
-  // In-place refresh: DON'T navigate (H5GG reverts navigations). Same-origin
-  // fetch with a unique query (CDN cache-miss = fresh) + no-store, then swap the
-  // body and re-run scripts. window.h5gg (native bridge) survives this.
-  function reloadMenu(){
-    var url = location.pathname.split('?')[0] + '?t=' + Date.now();
-    fetch(url, {cache:'no-store'})
-      .then(function(r){ return r.text(); })
-      .then(function(html){
-        var doc = new DOMParser().parseFromString(html, 'text/html');
-        document.body.innerHTML = doc.body.innerHTML;
-        var ss = doc.querySelectorAll('script');
-        for (var i=0;i<ss.length;i++){
-          var s=document.createElement('script');
-          if(ss[i].src){ s.src=ss[i].src; } else { s.textContent=ss[i].textContent; }
-          document.body.appendChild(s);
-        }
-      })
-      .catch(function(e){ try{ alert('reload fail: '+e); }catch(_){} });
-  }
-  document.getElementById('reload').addEventListener('click', reloadMenu);
+/* ---------- H5GG menu side ---------- */
+var eng=document.getElementById('eng'); var script=null;
+function setEng(cls,txt){ eng.className=cls; eng.textContent=txt; }
+function q(id){ return document.getElementById(id); }
 
-  var n=0; var iv=setInterval(function(){ n++; if(typeof h5gg!=='undefined'||n>20){ clearInterval(iv); if(diag()){ codePatchTest(); } } }, 300);
+// tabs
+var tabs=document.querySelectorAll('.tab'), panels=document.querySelectorAll('.panel');
+for(var i=0;i<tabs.length;i++){ tabs[i].addEventListener('click',function(){ var t=this.getAttribute('data-t');
+  for(var j=0;j<tabs.length;j++){ tabs[j].classList.toggle('on',tabs[j].getAttribute('data-t')===t); }
+  for(var k=0;k<panels.length;k++){ panels[k].classList.toggle('on',panels[k].getAttribute('data-p')===t); } }); }
+
+function callSet(k,v){ try{ if(script) script.call("set",[k,v]); }catch(e){ alert("set err:"+e); } }
+
+// wire toggles
+function tog(id,key){ q(id).addEventListener('change',function(){ callSet(key,this.checked); }); }
+tog('cD','det'); tog('cM1','m1'); tog('cM8','m8'); tog('cM12','m12'); tog('cTX','tx'); tog('cM11','m11'); tog('cSP','spoof');
+// sliders
+function sld(id,vid,key){ var s=q(id),v=q(vid); s.addEventListener('input',function(){ v.textContent='x'+s.value; callSet(key,Number(s.value)); }); }
+sld('sM2','vM2','m2'); sld('sM3','vM3','m3'); sld('sM4','vM4','m4');
+// buttons
+q('bReset').addEventListener('click',function(){ if(!script){alert("engine未初期化");return;}
+  try{ script.call("reset"); }catch(e){ alert("reset err:"+e); } });
+q('bColl').addEventListener('click',function(){ if(!script)return; try{ var c=script.call("coll"); alert("収集: "+c.split("|")[0]+" 件\n保存先:\n"+(c.split("|")[1]||"(未)")); }catch(e){alert(e);} });
+q('bStat').addEventListener('click',function(){ if(!script){q('stat').textContent="engine未初期化";return;} try{ q('stat').textContent=script.call("status"); }catch(e){q('stat').textContent=""+e;} });
+
+// bootstrap h5frida + inject script
+function boot(){
+  try{
+    if(typeof h5gg==='undefined'){ setEng('eng-bad','no h5gg'); setTimeout(boot,400); return; }
+    var h5f=h5gg.loadPlugin("h5frida","h5frida-15.1.24.dylib");
+    if(!h5f){ setEng('eng-bad','h5frida load fail'); return; }
+    if(!h5f.loadGadget("frida-gadget-15.1.24.dylib")){ setEng('eng-bad','gadget fail'); return; }
+    var procs=h5f.enumerate_processes(); if(!procs||!procs.length){ setEng('eng-bad','no procs'); return; }
+    var session=h5f.attach(-1); if(!session){ setEng('eng-bad','attach fail'); return; }
+    var code="("+frida_script.toString()+")()";
+    script=session.create_script(code); if(!script){ setEng('eng-bad','script create fail'); return; }
+    script.on('message',function(msg){ if(msg.type=='error'){ try{alert("frida error:\n"+JSON.stringify(msg).slice(0,400));}catch(e){} } });
+    if(!script.load()){ setEng('eng-bad','script load fail'); return; }
+    var r=script.call("init");
+    setEng('eng-ok','engine OK');
+    // apply defaults (detectors default ON)
+    callSet('det', q('cD').checked);
+  }catch(e){ setEng('eng-bad','boot err'); try{alert("boot err:\n"+e);}catch(_){} }
+}
+setTimeout(boot, 300);
 </script>
 </body>
 </html>
