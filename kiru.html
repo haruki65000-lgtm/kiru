@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>kiru mod</title>
+<style>
+  * { box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  html,body { margin:0; padding:0; font-family:-apple-system,"Hiragino Sans",sans-serif; }
+  body { background:rgba(10,10,18,0.96); color:#ecebf3; padding:14px 14px 24px; }
+  .brand { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .logo { width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+          font-weight:800;color:#1a0e18;background:linear-gradient(135deg,#ff6f8a,#ffb45a); }
+  h1 { font-size:17px; margin:0; }
+  .ver { font-size:10px; color:#8a89a3; margin-top:2px; }
+  .card { background:rgba(30,28,42,0.7); border:1px solid #2f2c3e; border-radius:12px; padding:12px; margin:10px 0; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .label { font-size:14px; }
+  .sub { font-size:11px; color:#8a89a3; margin-top:4px; word-break:break-all; }
+  .btn { display:inline-block; padding:9px 14px; border-radius:9px; border:1px solid #3d394f;
+         background:#1e1c2a; color:#ecebf3; font-size:13px; font-weight:700; }
+  .btn.primary { background:linear-gradient(135deg,#ff6f8a,#ffb45a); color:#1a0e18; border:none; }
+  .sw { position:relative; width:46px; height:26px; flex:0 0 auto; }
+  .sw input { display:none; }
+  .sl { position:absolute; inset:0; background:#26243a; border:1px solid #3d394f; border-radius:99px; transition:.15s; }
+  .sl:before { content:""; position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:#8a89a3; transition:.15s; }
+  .sw input:checked + .sl { background:linear-gradient(135deg,#ff6f8a,#ffb45a); border-color:transparent; }
+  .sw input:checked + .sl:before { transform:translateX(20px); background:#fff; }
+  .slider { width:100%; margin-top:10px; -webkit-appearance:none; height:6px; border-radius:99px; background:#26243a; outline:none; }
+  .slider::-webkit-slider-thumb { -webkit-appearance:none; width:20px;height:20px;border-radius:50%; background:linear-gradient(135deg,#ff6f8a,#ffb45a); }
+  .val { font-family:ui-monospace,monospace; font-weight:700; color:#ffb45a; }
+  .ok { color:#6fe6b4; } .bad { color:#ff5c7c; } .warn{color:#ffb45a;}
+  pre { font-size:10.5px; color:#b7b4c9; white-space:pre-wrap; word-break:break-all; margin:6px 0 0; line-height:1.5; }
+</style>
+</head>
+<body>
+  <div class="brand" style="justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="logo">K</div>
+      <div><h1>kiru mod</h1><div class="ver">remote / v11.88.0</div></div>
+    </div>
+    <span class="btn primary" id="reload">🔄 更新</span>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="label">① エンジン疎通</span></div>
+    <pre id="diag">checking…</pre>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="label">② コードパッチ検証 (frida不要)</span>
+      <span class="btn" id="cpbtn">再実行</span></div>
+    <div class="sub">UnityFrameworkのコード番地にwrite→読戻し→復元。◎ならD1-D6/M1等が動的トグルで実装可</div>
+    <pre id="cp">tap 再実行</pre>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="label">③ データ書込み検証</span>
+      <span class="btn" id="dwbtn">実行</span></div>
+    <pre id="dw">tap 実行</pre>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div><div class="label">サンプル トグル</div><div class="sub">UI確認</div></div>
+      <label class="sw"><input type="checkbox" id="t1" checked><span class="sl"></span></label>
+    </div>
+  </div>
+  <div class="card">
+    <div class="row"><span class="label">サンプル スライダー</span><span class="val" id="sv">x10</span></div>
+    <input class="slider" id="s1" type="range" min="1" max="500" value="10">
+  </div>
+
+<script>
+  var s1=document.getElementById('s1'), sv=document.getElementById('sv');
+  s1.addEventListener('input', function(){ sv.textContent='x'+s1.value; });
+
+  function hex(n){ return '0x'+(n>>>0>=0?Number(n):n).toString(16); }
+  function toHexAddr(n){ return '0x'+Math.trunc(n).toString(16); }
+
+  function diag(){
+    var d=document.getElementById('diag');
+    if(typeof h5gg==='undefined'){ d.className='bad'; d.textContent='h5gg undefined'; return false; }
+    var out=['H5GG OK'];
+    try{ var r=h5gg.getRangesList('UnityFramework'); out.push('UnityFramework: '+(r?r.length+' seg':'null')); if(r&&r.length) out.push('UF base: '+r[0].start); }catch(e){ out.push('UF err:'+e); }
+    d.className='ok'; d.textContent=out.join('\n'); return true;
+  }
+
+  // ② frida-free code patch probe: write RET to a UnityFramework code addr, read back, restore
+  function codePatchTest(){
+    var el=document.getElementById('cp');
+    try{
+      if(typeof h5gg==='undefined'){ el.className='bad'; el.textContent='h5gg undefined'; return; }
+      var r=h5gg.getRangesList('UnityFramework');
+      if(!r||!r.length){ el.className='bad'; el.textContent='UnityFramework not found'; return; }
+      var base=Number(r[0].start);
+      var RVA=0x0468A35C;                 // DoDamage (from dump)
+      var addr=base+RVA;
+      var addrHex=toHexAddr(addr);
+      var RET=String(0xD65F03C0>>>0);     // arm64 'ret' as U32 (bytes C0 03 5F D6)
+      var orig=h5gg.getValue(addrHex,'U32');
+      var wrote=h5gg.setValue(addrHex, RET, 'U32');
+      var rb=h5gg.getValue(addrHex,'U32');
+      // restore
+      if(orig!==null && orig!==undefined) h5gg.setValue(addrHex, String(orig), 'U32');
+      var rb2=h5gg.getValue(addrHex,'U32');
+      var success = (Number(rb)>>>0)===(0xD65F03C0>>>0);
+      el.className = success?'ok':'bad';
+      el.textContent =
+        'addr: '+addrHex+
+        '\norig U32: '+orig+' ('+(orig!=null?hex(Number(orig)):'')+')'+
+        '\nsetValue ret: '+wrote+
+        '\nread-back: '+rb+' ('+(rb!=null?hex(Number(rb)):'')+')'+
+        '\nrestored: '+rb2+
+        '\n=> CODE PATCH '+(success?'OK ✅ (frida不要で行ける)':'FAIL ❌ (コード書込不可)');
+    }catch(e){ el.className='bad'; el.textContent='exception: '+e; }
+  }
+
+  // ③ data write probe: write+read on the module base header region is risky; instead
+  //    write into a scratch we own is not available, so test read/write round-trip on a
+  //    UnityFramework __DATA-ish addr via a harmless offset then restore.
+  function dataWriteTest(){
+    var el=document.getElementById('dw');
+    try{
+      var r=h5gg.getRangesList('UnityFramework');
+      if(!r||!r.length){ el.className='bad'; el.textContent='no UF'; return; }
+      var base=Number(r[0].start);
+      // pick an address well inside the image; just prove read works and write-restore round-trips
+      var addr=base+0x100; var aHex=toHexAddr(addr);
+      var orig=h5gg.getValue(aHex,'U32');
+      el.className='warn';
+      el.textContent='read @'+aHex+' U32='+orig+' ('+(orig!=null?hex(Number(orig)):'')+')\n(read動作の確認。書込は②で判定)';
+    }catch(e){ el.className='bad'; el.textContent='exception: '+e; }
+  }
+
+  document.getElementById('cpbtn').addEventListener('click', codePatchTest);
+  document.getElementById('dwbtn').addEventListener('click', dataWriteTest);
+  document.getElementById('reload').addEventListener('click', function(){
+    // cache-bust reload so gist edits show up immediately
+    var b=location.href.split('?')[0];
+    location.href = b + '?t=' + Date.now();
+  });
+
+  var n=0; var iv=setInterval(function(){ n++; if(typeof h5gg!=='undefined'||n>20){ clearInterval(iv); if(diag()){ codePatchTest(); } } }, 300);
+</script>
+</body>
+</html>
