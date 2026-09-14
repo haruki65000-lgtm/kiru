@@ -55,9 +55,10 @@
   </div>
 
   <div class="card">
-    <div class="row"><span class="label">③ データ書込み検証</span>
-      <span class="btn" id="dwbtn">実行</span></div>
-    <pre id="dw">tap 実行</pre>
+    <div class="row"><span class="label">③ h5frida フック検証</span>
+      <span class="btn primary" id="frbtn">ロード試行</span></div>
+    <div class="sub">frida15が26.6で動くか。動けばフック/コードパッチ/ObjC全部いける。落ちたら=不可。<b>アプリが落ちる可能性あり</b></div>
+    <pre id="fr">tap ロード試行</pre>
   </div>
 
   <div class="card">
@@ -116,25 +117,34 @@
     }catch(e){ el.className='bad'; el.textContent='exception: '+e; }
   }
 
-  // ③ data write probe: write+read on the module base header region is risky; instead
-  //    write into a scratch we own is not available, so test read/write round-trip on a
-  //    UnityFramework __DATA-ish addr via a harmless offset then restore.
-  function dataWriteTest(){
-    var el=document.getElementById('dw');
-    try{
-      var r=h5gg.getRangesList('UnityFramework');
-      if(!r||!r.length){ el.className='bad'; el.textContent='no UF'; return; }
-      var base=Number(r[0].start);
-      // pick an address well inside the image; just prove read works and write-restore round-trips
-      var addr=base+0x100; var aHex=toHexAddr(addr);
-      var orig=h5gg.getValue(aHex,'U32');
-      el.className='warn';
-      el.textContent='read @'+aHex+' U32='+orig+' ('+(orig!=null?hex(Number(orig)):'')+')\n(read動作の確認。書込は②で判定)';
-    }catch(e){ el.className='bad'; el.textContent='exception: '+e; }
+  // ③ h5frida load + code-patch probe (frida-15 based). May crash if frida-15 dies on iOS26.
+  function h5fridaTest(){
+    var el=document.getElementById('fr');
+    el.className='warn'; el.textContent='loading h5frida (frida-gadget-15 dlopen)…';
+    setTimeout(function(){
+      try{
+        var h5f=h5gg.loadPlugin('h5frida','h5frida-15.1.24.dylib');
+        if(!h5f){ el.className='bad'; el.textContent='loadPlugin returned null → h5frida load FAIL'; return; }
+        var out=['h5frida LOADED ✅'];
+        try{ out.push('plugin ver: '+h5f.pluginVersion()); }catch(e){ out.push('pluginVersion err: '+e); }
+        try{ out.push('frida core: '+h5f.coreVersion()); }catch(e){ out.push('coreVersion err: '+e); }
+        // code-patch self-test on hookme.test.dylib (from repo example)
+        try{
+          var hm=h5gg.loadPlugin('hookme','hookme.test.dylib');
+          var before=hm.addInt(1,2);
+          var active=h5f.ActiveCodePatch('hookme.test.dylib',0x7E48,'200080D2');
+          var after=hm.addInt(1,2);
+          try{ h5f.DeactiveCodePatch('hookme.test.dylib',0x7E48,'200080D2'); }catch(e){}
+          out.push('codepatch active='+active+'  addInt(1,2): before='+before+' after='+after);
+          out.push(String(before)!==String(after) ? '=> CODE PATCH via h5frida OK ✅ (全部いける)' : '=> codepatch 効果なし ❌');
+        }catch(e){ out.push('codepatch err: '+e); }
+        el.className='ok'; el.textContent=out.join('\n');
+      }catch(e){ el.className='bad'; el.textContent='exception: '+e; }
+    }, 60);
   }
 
   document.getElementById('cpbtn').addEventListener('click', codePatchTest);
-  document.getElementById('dwbtn').addEventListener('click', dataWriteTest);
+  document.getElementById('frbtn').addEventListener('click', h5fridaTest);
   document.getElementById('reload').addEventListener('click', function(){
     // cache-bust reload so gist edits show up immediately
     var b=location.href.split('?')[0];
